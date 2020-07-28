@@ -107,7 +107,7 @@ client.on('messageUpdate', async (oldmsg, newmsg) => {
        .addField('Before', oldmsg.content)
        .addField('After', newmsg.content)
        .setColor(0xe19517)
-       .setTimestamp()
+       .setTimestamp();
    await channel.send(embed)
 })
 
