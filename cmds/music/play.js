@@ -1,5 +1,4 @@
 const ytdl = require('ytdl-core')
-const config = require(`${process.cwd()}/config.json`)
 const searchYoutube = require('yt-search');
 const { commands } = require('../../bot');
 const queue = new Map();
