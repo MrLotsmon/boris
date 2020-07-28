@@ -98,7 +98,44 @@ client.on('messageReactionAdd', (react, user) => {
     }
 });
 
+client.on('messageUpdate', async (oldmsg, newmsg) => {
+    let channel = oldmsg.guild.channels.find(c => c.name == 'log')
+    let embed = new Discord.RichEmbed()
+       .setAuthor('Message changed', newmsg.guild.iconURL)
+       .addField('Sender', oldmsg.member, true)
+       .addField('Channel', oldmsg.channel, true)
+       .addField('Before', oldmsg.content)
+       .addField('After', newmsg.content)
+       .setColor(0xe19517)
+       .setTimestamp()
+   await channel.send(embed)
+})
+
+client.on('messageDelete', async message => {
+    let channel = message.guild.channels.find(c => c.name == 'log')
+   let embed = new Discord.RichEmbed()
+       .setAuthor('Message deleted', client.user.avatarURL)
+       .addField('Sender', message.member, true)
+       .addField('Channel', message.channel, true)
+       .addField('Content', message.content)
+       .setColor(0xf04747)
+       .setTimestamp()
+   await channel.send(embed)
+})
+
+client.on('guildMemberRemove', async member => {
+   let embed = new Discord.RichEmbed()
+       .setAuthor('Member left', client.user.avatarURL)
+       .setDescription(`${member.user.username}#${member.user.discriminator} (${member.id})`)
+       .setColor(0xf04747)
+       .setFooter(`ID: ${member.id}`)
+       .setTimestamp()
+   let channel = member.guild.channels.find(c => c.name == 'log')
+   await channel.send(embed)
+})
+
 client.on('guildMemberAdd', member => {
+    
     const channel = member.guild.channels.find(ch => ch.name === 'public-chat');
     if (!channel) return;
     let welcom = member.guild.roles.find("name", "NOT CONFIRMED");
@@ -107,6 +144,14 @@ client.on('guildMemberAdd', member => {
         let himes = afp.send(`Welcome to the server, ${member}`);
         setTimeout(() => { himes.delete();}, 10000);
     });
+    let channel = member.guild.channels.find(c => c.name == 'log')
+    let embed =  new Discord.RichEmbed()
+       .setAuthor('Member joined', client.user.avatarURL)
+       .setDescription(`${member.user.username}#${member.user.discriminator} (${member})`)
+       .setColor(0x41b581)
+       .setFooter(`ID: ${member.id}`)
+       .setTimestamp()
+       await channel.send(embed)
   });
 
 client.on('reconnecting', () => {

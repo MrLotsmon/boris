@@ -5,7 +5,7 @@ const bot = require(`${process.cwd()}/bot.js`);
 //Creating module
 const music = new Module({
     "name": "Music",
-    "description": "Sounds good, aren't it?\nOnly radio supported, because YT sucks"
+    "description": "Sounds good, aren't it?\nOnly YT"
 });
 const play = new Command({
     "name": "play",
@@ -21,17 +21,3 @@ const stop = new Command({
     "description": "Turn off music"
 });
 music.addCommand(stop);
-const connect = new Command({
-    "name": "connect",
-    "file": "./cmds/music/connect.js",
-    "usage": "+connect",
-    "description": "Connect voice channel"
-});
-music.addCommand(connect);
-const disconnect = new Command({
-    "name": "disconnect",
-    "file": "./cmds/music/disconnect.js",
-    "usage": "+disconnect",
-    "description": "Disconnect voice channel"
-});
-music.addCommand(disconnect);
