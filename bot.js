@@ -144,14 +144,14 @@ client.on('guildMemberAdd', member => {
         let himes = afp.send(`Welcome to the server, ${member}`);
         setTimeout(() => { himes.delete();}, 10000);
     });
-    let channel = member.guild.channels.find(c => c.name == 'log')
+    let channellog = member.guild.channels.find(c => c.name == 'log')
     let embed =  new Discord.RichEmbed()
        .setAuthor('Member joined', client.user.avatarURL)
        .setDescription(`${member.user.username}#${member.user.discriminator} (${member})`)
        .setColor(0x41b581)
        .setFooter(`ID: ${member.id}`)
        .setTimestamp()
-       await channel.send(embed)
+       channellog.send(embed)
   });
 
 client.on('reconnecting', () => {
