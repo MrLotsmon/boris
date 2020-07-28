@@ -100,7 +100,7 @@ client.on('messageReactionAdd', (react, user) => {
 
 client.on('messageUpdate', async (oldmsg, newmsg) => {
     let channel = oldmsg.guild.channels.find(c => c.name == 'log')
-    let embed = new Discord.RichEmbed()
+    let embed = new discord.RichEmbed()
        .setAuthor('Message changed', newmsg.guild.iconURL)
        .addField('Sender', oldmsg.member, true)
        .addField('Channel', oldmsg.channel, true)
@@ -113,7 +113,7 @@ client.on('messageUpdate', async (oldmsg, newmsg) => {
 
 client.on('messageDelete', async message => {
     let channel = message.guild.channels.find(c => c.name == 'log')
-   let embed = new Discord.RichEmbed()
+   let embed = new discord.RichEmbed()
        .setAuthor('Message deleted', client.user.avatarURL)
        .addField('Sender', message.member, true)
        .addField('Channel', message.channel, true)
@@ -124,7 +124,7 @@ client.on('messageDelete', async message => {
 })
 
 client.on('guildMemberRemove', async member => {
-   let embed = new Discord.RichEmbed()
+   let embed = new discord.RichEmbed()
        .setAuthor('Member left', client.user.avatarURL)
        .setDescription(`${member.user.username}#${member.user.discriminator} (${member.id})`)
        .setColor(0xf04747)
@@ -145,7 +145,7 @@ client.on('guildMemberAdd', member => {
         setTimeout(() => { himes.delete();}, 10000);
     });
     let channellog = member.guild.channels.find(c => c.name == 'log')
-    let embed =  new Discord.RichEmbed()
+    let embed =  new discord.RichEmbed()
        .setAuthor('Member joined', client.user.avatarURL)
        .setDescription(`${member.user.username}#${member.user.discriminator} (${member})`)
        .setColor(0x41b581)
