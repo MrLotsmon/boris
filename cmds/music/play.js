@@ -1,7 +1,12 @@
 const ytdl = require('ytdl-core')
+const config = require(`${process.cwd()}/config.json`)
 const searchYoutube = require('yt-search');
 const { commands } = require('../../bot');
 const queue = new Map();
+exports.queue = queue;
+exports.play = play;
+exports.skip = skip;
+exports.stop = stop;
 
 module.exports.run = async message => {
     const s = message.content.split(" ");
@@ -16,17 +21,9 @@ module.exports.run = async message => {
 
     let valid = ytdl.validateURL(song)
     if (!valid) {
-        var args = message.content.slice(process.env.prefix.length).trim().split(" ");
+        var args = message.content.slice(config.prefix.length).trim().split(" ");
         args.splice(0, 1);
         var mesg = args.join(" ");
-        /*
-        var options = {
-            q: mesg,
-            part: 'snippet',
-            type: 'video'
-        };
-        console.log(options);
-        */
         console.log(mesg);
         searchYoutube(mesg, function ( err, r ) {
             if(!err)
@@ -43,26 +40,7 @@ module.exports.run = async message => {
                     }
                 });
             }
-          } )
-        /*
-        searchYoutube('AIzaSyCtG_oxN7C94nbyOPoZalmTt6tbJd-IVj4', options, function(err, result){
-            console.log(err);
-            console.log(result);
-            if (err) {
-                console.log(err);
-            } else {
-                url = result.items[0].id.videoId;
-                ytdl.getInfo(url, (err, info) => {
-                    if (!err) {
-                        let songtittle = info.title;
-                        guild_queue.songs.push(url)
-                        message.channel.send("Track added to queue ```"+songtittle+"```")
-                        if (guild_queue.songs.length < 2) play(connection, guild_queue.songs)
-                    }
-                });
-            }
-        });
-        */
+          })
     }
     else{
         url = song;
@@ -87,4 +65,15 @@ async function play(connection, songs) {
         if (songs.length > 0) play(connection, songs)
         else connection.disconnect()
     })
+}
+
+async function skip(connection, songs) {
+    if (songs.length > 0){
+        let music = await ytdl(songs[0], {filter: 'audioonly'})
+        connection.playStream(music, {volume: 0.5})
+    }
+}
+
+async function stop(connection){
+    connection.disconnect();
 }

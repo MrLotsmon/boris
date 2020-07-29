@@ -21,3 +21,10 @@ const stop = new Command({
     "description": "Turn off music"
 });
 music.addCommand(stop);
+const skip = new Command({
+    "name": "skip",
+    "file": "./cmds/music/skip.js",
+    "usage": "+skip",
+    "description": "Skip this track"
+});
+music.addCommand(skip);
