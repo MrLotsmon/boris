@@ -5,18 +5,25 @@ module.exports.commands = cmd;
 const discord = require("discord.js");
 const client = new discord.Client();
 module.exports.client = client;
-const { Console } = require("console");
 require("./modules.js");
-var queue = {};
-const { on } = require("process");
+//#region BotEvents
 client.login(process.env.token);
 client.on("ready", async bot => {
     client.channels.get('737078310219153439').fetchMessage('737309985951973397');
     console.log(`Logged in as ${client.user.tag}`);
     client.user.setPresence({ game: { name: '+help | BORIS', url: 'https://discord.gg/7yghNJh', type: 'PLAYING' }, status: 'By: Lotsmon' })
 });
-
-
+client.on('reconnecting', () => {
+    console.log('Reconnecting!');
+   });
+client.on('disconnect', () => {
+    console.log('Disconnect!');
+   });
+   client.on('error', err =>{
+    console.log("BUGGGG");
+});
+//#endregion
+//#region MessageEvents
 client.on("message", async message => {
     if(message.author.bot) return;
     if(!message.guild) return;
@@ -32,7 +39,7 @@ client.on("message", async message => {
     else
     if(message.channel == message.guild.channels.find("name", "bot-commands")){
         cmd.forEach((value, key, map) => {
-            if(message.content.toLowerCase().startsWith(`${config.prefix}${value.name}`)) {
+            if(message.content.toLowerCase().startsWith(`${process.env.prefix}${value.name}`)) {
                 message.delete();
                 require(value.file).run(message);
             }
@@ -40,6 +47,50 @@ client.on("message", async message => {
     }
 });
 
+client.on('messageReactionAdd', (react, user) => {
+    if(user.bot) return;
+    let msgid = react.message.id;
+    let msg = react.message;
+    if(msgid == '737309985951973397'){
+        if(react.name = ':white_check_mark:'){
+            let userid = user.id;
+            let welcom = react.message.member.guild.roles.find("name", "NOT CONFIRMED");
+            react.message.guild.members.get(userid).removeRole(welcom);
+            msg.clearReactions();
+            msg.react(react.emoji);
+        }
+        else 
+        msg.react(':white_check_mark:');
+    }
+});
+
+client.on('messageUpdate', async (oldmsg, newmsg) => {
+    if(!newmsg.content) return;
+    let channel = oldmsg.guild.channels.find(c => c.name == 'log')
+    let embed = new discord.RichEmbed()
+       .setAuthor('Message changed', newmsg.guild.iconURL)
+       .addField('Sender', `${oldmsg.member}`, true)
+       .addField('Channel', `${oldmsg.channel}`, true)
+       .addField('Before', oldmsg.content, false)
+       .addField('After', newmsg.content, false)
+       .setColor(0xe19517)
+       .setTimestamp();
+   await channel.send(embed)
+})
+
+client.on('messageDelete', async message => {
+    let channel = message.guild.channels.find(c => c.name == 'log')
+    let embed = new discord.RichEmbed()
+       .setAuthor('Message deleted', client.user.avatarURL)
+       .addField('Sender', message.member, true)
+       .addField('Channel', message.channel, true)
+       .addField('Content', message.content)
+       .setColor(0xf04747)
+       .setTimestamp()
+   await channel.send(embed)
+})
+//#endregion
+//#region ChannelEvents
 var temporary = []
 
 client.on('voiceStateUpdate', (oldMember, newMember) =>{
@@ -84,44 +135,26 @@ client.on('voiceStateUpdate', (oldMember, newMember) =>{
         }
     }
 })
-
-client.on('messageReactionAdd', (react, user) => {
-    if(user.bot) return;
-    let msgid = react.message.id;
-    let msg = react.message;
-    if(msgid == '737309985951973397'){
-        if(react.name = ':white_check_mark:'){
-            let userid = user.id;
-            let welcom = react.message.member.guild.roles.find("name", "NOT CONFIRMED");
-            react.message.guild.members.get(userid).removeRole(welcom);
-        }
-    }
-});
-
-client.on('messageUpdate', async (oldmsg, newmsg) => {
-    let channel = oldmsg.guild.channels.find(c => c.name == 'log')
-    let embed = new discord.RichEmbed()
-       .setAuthor('Message changed', newmsg.guild.iconURL)
-       .addField('Sender', oldmsg.member, true)
-       .addField('Channel', oldmsg.channel, true)
-       .addField('Before', oldmsg.content)
-       .addField('After', newmsg.content)
-       .setColor(0xe19517)
-       .setTimestamp();
-   await channel.send(embed)
-})
-
-client.on('messageDelete', async message => {
-    let channel = message.guild.channels.find(c => c.name == 'log')
-   let embed = new discord.RichEmbed()
-       .setAuthor('Message deleted', client.user.avatarURL)
-       .addField('Sender', message.member, true)
-       .addField('Channel', message.channel, true)
-       .addField('Content', message.content)
-       .setColor(0xf04747)
+//#endregion
+//#region Guildevents
+client.on('guildMemberAdd', async member => {
+    const channel = member.guild.channels.find(ch => ch.name === 'public-chat');
+    if (!channel) return;
+    let welcom = member.guild.roles.find("name", "NOT CONFIRMED");
+    member.addRole(welcom).then(() => {
+        let afp = member.guild.channels.find("name", "welcome-chat");
+        afp.send(`Welcome to the server, ${member}`);
+        setTimeout(() => { afp.bulkDelete(1);}, 10000);
+    });
+    let channellog = member.guild.channels.find(c => c.name == 'log')
+    let embed =  new discord.RichEmbed()
+       .setAuthor('Member joined', client.user.avatarURL)
+       .setDescription(`${member.user.username}#${member.user.discriminator} (${member})`)
+       .setColor(0x41b581)
+       .setFooter(`ID: ${member.id}`)
        .setTimestamp()
-   await channel.send(embed)
-})
+       await channellog.send(embed)
+  });
 
 client.on('guildMemberRemove', async member => {
    let embed = new discord.RichEmbed()
@@ -133,33 +166,4 @@ client.on('guildMemberRemove', async member => {
    let channel = member.guild.channels.find(c => c.name == 'log')
    await channel.send(embed)
 })
-
-client.on('guildMemberAdd', member => {
-    
-    const channel = member.guild.channels.find(ch => ch.name === 'public-chat');
-    if (!channel) return;
-    let welcom = member.guild.roles.find("name", "NOT CONFIRMED");
-    member.addRole(welcom).then(() => {
-        let afp = member.guild.channels.find("name", "welcome-chat");
-        let himes = afp.send(`Welcome to the server, ${member}`);
-        setTimeout(() => { himes.delete();}, 10000);
-    });
-    let channellog = member.guild.channels.find(c => c.name == 'log')
-    let embed =  new discord.RichEmbed()
-       .setAuthor('Member joined', client.user.avatarURL)
-       .setDescription(`${member.user.username}#${member.user.discriminator} (${member})`)
-       .setColor(0x41b581)
-       .setFooter(`ID: ${member.id}`)
-       .setTimestamp()
-       channellog.send(embed)
-  });
-
-client.on('reconnecting', () => {
-    console.log('Reconnecting!');
-   });
-client.on('disconnect', () => {
-    console.log('Disconnect!');
-   });
-   client.on('error', err =>{
-       Console.log("BUGGGG");
-   });
+//#endregion

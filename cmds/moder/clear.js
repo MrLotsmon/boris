@@ -12,7 +12,7 @@ module.exports.run = async message => {
                 formes -= i*100;
               }
         }
-        else await message.channel.bulkDelete(args[1]);
+        else message.channel.bulkDelete(args[1]);
         let embed = new discord.RichEmbed()
         .setColor([255,125,0])
         .setDescription(`${message.member}, Cleared ${args[1]}, messages!`)
