@@ -1,5 +1,4 @@
 const ytdl = require('ytdl-core')
-const config = require(`${process.cwd()}/config.json`)
 const searchYoutube = require('yt-search');
 const { commands } = require('../../bot');
 const queue = new Map();
@@ -21,7 +20,7 @@ module.exports.run = async message => {
 
     let valid = ytdl.validateURL(song)
     if (!valid) {
-        var args = message.content.slice(config.prefix.length).trim().split(" ");
+        var args = message.content.slice(process.env.prefix.length).trim().split(" ");
         args.splice(0, 1);
         var mesg = args.join(" ");
         console.log(mesg);
