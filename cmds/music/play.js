@@ -22,7 +22,7 @@ module.exports.run = async message => {
 
     let valid = ytdl.validateURL(song)
     if (!valid) {
-        var args = message.content.slice(process.env.prefix.length).trim().split(" ");
+        var args = message.content.slice(config.prefix.length).trim().split(" ");
         args.splice(0, 1);
         var mesg = args.join(" ");
         searchYoutube(mesg, function ( err, r ) {
@@ -57,6 +57,7 @@ module.exports.run = async message => {
     else{
         url = song;
         ytdl.getInfo(`${url}`, (err, info) => {
+            if(err) console.log(err);
             if (!err) {
                 if(info.videoDetails.isLiveContent) return message.channel.send('Broadcasts not supported')
                 let songtittle = info.title;
@@ -83,29 +84,15 @@ async function play(songs) {
     let music = await ytdl(songs[0].url, {filter: 'audioonly'})
 
     dispatcher = connection.playStream(music, {volume: 0.3, passes: 5})
-    dispatcher.setBitrate(128);
+    dispatcher.setBitrate(320);
     dispatcher.on('end', () => {
         songs.shift()
         if (songs.length > 0) play(songs)
         else {
-            let embed = new discord.RichEmbed()
-            .setAuthor('Queue is empty', msg.client.user.avatarURL)
-            msg.channel.send(embed)
+            msg.channel.send('Queue is empty')
             connection.disconnect();
         }
     });
-    /*
-    dispatcher.on('start', () =>{
-        let embed = new discord.RichEmbed()
-        .setTitle(songs[0].title)
-        .setURL(songs[0].url)
-        .setAuthor('Now Playing')
-        .addField('Song Duration', songs[0].songduration, true)
-        .setThumbnail(songs[0].imgurl)
-        .setColor(0x252525)
-        msg.channel.send(embed)
-    }); process.env
-    */
 }
 
 function skip(songs) {
