@@ -57,12 +57,23 @@ module.exports.run = async message => {
     else{
         url = song;
         ytdl.getInfo(`${url}`, (err, info) => {
-            if(err) console.log(err);
             if (!err) {
+                if(info.videoDetails.isLiveContent) return message.channel.send('Broadcasts not supported')
                 let songtittle = info.title;
-                        guild_queue.songs.push({url: url, title: info.title, requester: message.author.username})
-                        message.channel.send("Track added to queue ```"+songtittle+"```")
-                        if (guild_queue.songs.length < 2) play(guild_queue.songs)
+                url = info.video_url;
+                var dur = info.videoDetails.lengthSeconds, minutes = Math.floor(dur / 60), seconds = dur - minutes * 60, time = `${minutes}:${seconds}`, imgurl = info.videoDetails.thumbnail.thumbnails[0].url;
+                guild_queue.songs.push({url: url, title: info.title, requester: message.author.username, songduration: time, preview: imgurl})
+                let embed = new discord.RichEmbed()
+                .setTitle(info.title)
+                .setURL(url)
+                .setAuthor('Added to queue', message.member.user.avatarURL)
+                .addField('Channel', message.channel.name, true)
+                .addField('Song Duration', time, true)
+                .setThumbnail(imgurl)
+                .setColor(0x252525)
+                message.channel.send(embed)
+                console.log(guild_queue.songs);
+                if (guild_queue.songs.length < 2) play(guild_queue.songs)
             }
         });
     }
