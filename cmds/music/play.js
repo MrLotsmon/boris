@@ -22,7 +22,7 @@ module.exports.run = async message => {
 
     let valid = ytdl.validateURL(song)
     if (!valid) {
-        var args = message.content.slice(config.prefix.length).trim().split(" ");
+        var args = message.content.slice(process.env.prefix.length).trim().split(" ");
         args.splice(0, 1);
         var mesg = args.join(" ");
         searchYoutube(mesg, function ( err, r ) {
