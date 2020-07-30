@@ -5,7 +5,7 @@ const bot = require(`${process.cwd()}/bot.js`);
 //Creating module
 const music = new Module({
     "name": "Music",
-    "description": "Sounds good, aren't it?\nOnly YT"
+    "description": "Sounds good, aren't it?\n  Only YouTube"
 });
 const play = new Command({
     "name": "play",
@@ -14,13 +14,6 @@ const play = new Command({
     "description": "Play your music!"
 });
 music.addCommand(play);
-const stop = new Command({
-    "name": "stop",
-    "file": "./cmds/music/stop.js",
-    "usage": "+stop",
-    "description": "Turn off music"
-});
-music.addCommand(stop);
 const skip = new Command({
     "name": "skip",
     "file": "./cmds/music/skip.js",
@@ -28,3 +21,10 @@ const skip = new Command({
     "description": "Skip this track"
 });
 music.addCommand(skip);
+const queue = new Command({
+    "name": "queue",
+    "file": "./cmds/music/queue.js",
+    "usage": "+queue",
+    "description": "Display queue list"
+});
+music.addCommand(queue);

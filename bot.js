@@ -39,7 +39,7 @@ client.on("message", async message => {
     else
     if(message.channel == message.guild.channels.find("name", "bot-commands")){
         cmd.forEach((value, key, map) => {
-            if(message.content.toLowerCase().startsWith(`${process.env.prefix}${value.name}`)) {
+            if(message.content.toLowerCase().startsWith(`${cprocess.env.prefix}${value.name}`)) {
                 message.delete();
                 require(value.file).run(message);
             }

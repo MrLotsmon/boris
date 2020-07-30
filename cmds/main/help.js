@@ -21,6 +21,9 @@ module.exports.run = async message => {
                             message.reply(":no_entry_sign: Configure your privacy settings :no_entry_sign:");
                           });
                         break;
+                        case 'Music': 
+                        message.author.send(embed);
+                        break;
                         case 'Moderator': 
                         if(!message.member.hasPermission("MANAGE_MESSAGES")) break;
                         message.author.send(embed);

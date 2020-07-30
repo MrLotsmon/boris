@@ -1,11 +1,13 @@
 const ytdl = require('ytdl-core')
 const searchYoutube = require('yt-search');
-const { commands } = require('../../bot');
+const discord = require('discord.js');
 const queue = new Map();
-exports.queue = queue;
 exports.play = play;
 exports.skip = skip;
-exports.stop = stop;
+exports.queue = queue;
+let dispatcher, connect;
+let guild_queue;
+let msg;
 
 module.exports.run = async message => {
     const s = message.content.split(" ");
@@ -13,29 +15,40 @@ module.exports.run = async message => {
 
     if (!song) return message.channel.send('Provide a link to the track')
     if (!voice) return message.channel.send('Join the voice channel')
-
-    let connection = await voice.join()
-    let guild_queue = queue.get(message.guild.id)
+    connection = await voice.join()
+    guild_queue = queue.get(message.guild.id)
     if (!guild_queue) guild_queue = queue.set(message.guild.id, {songs: []}).get(message.guild.id)
+    msg = message;
 
     let valid = ytdl.validateURL(song)
     if (!valid) {
         var args = message.content.slice(process.env.prefix.length).trim().split(" ");
         args.splice(0, 1);
         var mesg = args.join(" ");
-        console.log(mesg);
         searchYoutube(mesg, function ( err, r ) {
             if(!err)
             {
                 url = r.videos[0].videoId;
-                console.log(url);
+                console.log(mesg+' '+url);
                 ytdl.getInfo(`${url}`, (err, info) => {
                     if(err) console.log(err);
                     if (!err) {
+                        if(info.videoDetails.isLiveContent) return message.channel.send('Broadcasts not supported')
                         let songtittle = info.title;
-                        guild_queue.songs.push(url)
-                        message.channel.send("Track added to queue ```"+songtittle+"```")
-                        if (guild_queue.songs.length < 2) play(connection, guild_queue.songs)
+                        url = info.video_url;
+                        var dur = info.videoDetails.lengthSeconds, minutes = Math.floor(dur / 60), seconds = dur - minutes * 60, time = `${minutes}:${seconds}`, imgurl = info.videoDetails.thumbnail.thumbnails[0].url;
+                        guild_queue.songs.push({url: url, title: info.title, requester: message.author.username, songduration: time, preview: imgurl})
+                        let embed = new discord.RichEmbed()
+                        .setTitle(info.title)
+                        .setURL(url)
+                        .setAuthor('Added to queue', message.member.user.avatarURL)
+                        .addField('Channel', message.channel.name, true)
+                        .addField('Song Duration', time, true)
+                        .setThumbnail(imgurl)
+                        .setColor(0x252525)
+                        message.channel.send(embed)
+                        console.log(guild_queue.songs);
+                        if (guild_queue.songs.length < 2) play(guild_queue.songs)
                     }
                 });
             }
@@ -47,32 +60,45 @@ module.exports.run = async message => {
             if(err) console.log(err);
             if (!err) {
                 let songtittle = info.title;
-                guild_queue.songs.push(url)
-                message.channel.send("Track added to queue ```"+songtittle+"```")
-                if (guild_queue.songs.length < 2) play(connection, guild_queue.songs)
+                        guild_queue.songs.push({url: url, title: info.title, requester: message.author.username})
+                        message.channel.send("Track added to queue ```"+songtittle+"```")
+                        if (guild_queue.songs.length < 2) play(guild_queue.songs)
             }
         });
     }
 }
 
-async function play(connection, songs) {
-    let music = await ytdl(songs[0], {filter: 'audioonly'})
+async function play(songs) {
+    let music = await ytdl(songs[0].url, {filter: 'audioonly'})
 
-    connection.playStream(music, {volume: 0.5})
-    .on('end', () => {
+    dispatcher = connection.playStream(music, {volume: 0.3, passes: 5})
+    dispatcher.setBitrate(128);
+    dispatcher.on('end', () => {
         songs.shift()
-        if (songs.length > 0) play(connection, songs)
-        else connection.disconnect()
-    })
+        if (songs.length > 0) play(songs)
+        else {
+            let embed = new discord.RichEmbed()
+            .setAuthor('Queue is empty', msg.client.user.avatarURL)
+            msg.channel.send(embed)
+            connection.disconnect();
+        }
+    });
+    /*
+    dispatcher.on('start', () =>{
+        let embed = new discord.RichEmbed()
+        .setTitle(songs[0].title)
+        .setURL(songs[0].url)
+        .setAuthor('Now Playing')
+        .addField('Song Duration', songs[0].songduration, true)
+        .setThumbnail(songs[0].imgurl)
+        .setColor(0x252525)
+        msg.channel.send(embed)
+    }); process.env
+    */
 }
 
-async function skip(connection, songs) {
-    if (songs.length > 0){
-        let music = await ytdl(songs[0], {filter: 'audioonly'})
-        connection.playStream(music, {volume: 0.5})
+function skip(songs) {
+    if (songs.length > 1){
+        dispatcher.end();
     }
-}
-
-async function stop(connection){
-    connection.disconnect();
 }
