@@ -12,6 +12,7 @@ class Command {
         this.name = options.name;
         this.file = options.file;
         this.description = options.description;
+        this.rusdescription = options.rusdescription;
         this.module = false;
         this.usage = options.usage;
         let inline;

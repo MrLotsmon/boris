@@ -7,5 +7,4 @@ module.exports.run = async message => {
     if (!guild_queue) guild_queue = play.queue.set(message.guild.id, {songs: []}).get(message.guild.id)
     console.log(guild_queue.songs);
     play.skip(guild_queue.songs);
-    message.channel.send(`Skiped...`);
 }

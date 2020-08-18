@@ -6,6 +6,7 @@ class Module {
         if(!options.description) throw new Error("Missed 'description' argument");
         this.name = options.name;
         this.description = options.description;
+        this.rusdescription = options.rusdescription;
         this.commands = new Map();
         this.image = options.image;
         bot.modules.set(options.name, this);

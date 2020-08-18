@@ -6,10 +6,16 @@ const discord = require("discord.js");
 const client = new discord.Client();
 module.exports.client = client;
 require("./modules.js");
+
 //#region BotEvents
 client.login(process.env.token);
 client.on("ready", async bot => {
     client.channels.get('737078310219153439').fetchMessage('737309985951973397');
+    let guild = client.channels.get('737078310219153439').guild;
+    roles.push({'name': 'RUS', 'role': guild.roles.find("name", "RUS")});
+    roles.push({'name': 'ENG', 'role': guild.roles.find("name", "ENG")});
+    roles.push({'name': 'NOT CONFIRMED', 'role': guild.roles.find("name", "NOT CONFIRMED")});
+
     console.log(`Logged in as ${client.user.tag}`);
     client.user.setPresence({ game: { name: '+help | BORIS', url: 'https://discord.gg/7yghNJh', type: 'PLAYING' }, status: 'By: Lotsmon' })
 });
@@ -47,20 +53,31 @@ client.on("message", async message => {
     }
 });
 
+let engflag, rusflag;
+let roles = [];
+exports.roles = roles;
+
 client.on('messageReactionAdd', (react, user) => {
     if(user.bot) return;
     let msgid = react.message.id;
     let msg = react.message;
-    if(msgid == '737309985951973397'){
-        if(react.name = ':white_check_mark:'){
+    if(msgid == '737309985951973397'){ //:flag_us:
+        let flags = msg.reactions.first(2);
+        if(rusflag == undefined) rusflag = flags[0].emoji;
+        if(engflag == undefined) engflag = flags[1].emoji;
+        if(react.emoji == rusflag){
             let userid = user.id;
-            let welcom = react.message.member.guild.roles.find("name", "NOT CONFIRMED");
-            react.message.guild.members.get(userid).removeRole(welcom);
-            msg.clearReactions();
-            msg.react(react.emoji);
+            react.message.guild.members.get(userid).removeRole(roles.find(el => el.name === 'NOT CONFIRMED').role);
+            react.message.guild.members.get(userid).addRole(roles.find(el => el.name === 'RUS').role);
         }
-        else 
-        msg.react(':white_check_mark:');
+        if(react.emoji == engflag){ //'��' '��' 
+            let userid = user.id;
+            react.message.guild.members.get(userid).removeRole(roles.find(el => el.name === 'NOT CONFIRMED').role);
+            react.message.guild.members.get(userid).addRole(roles.find(el => el.name === 'ENG').role);
+        }
+        msg.clearReactions();
+        msg.react(rusflag);
+        msg.react(engflag);
     }
 });
 

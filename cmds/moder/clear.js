@@ -3,25 +3,29 @@ const bot = require(`${process.cwd()}/bot.js`);
 
 module.exports.run = async message => {
     const args = message.content.split(" ");
-    if(!message.member.hasPermission("MANAGE_MESSAGES")) return message.reply(":no_entry_sign: You can't clear messages! :no_entry_sign:");
-        if(!args[1]) return args[1] = 1;
-        let formes = args[1];
-        if(args[1] > 100) {
-            for (let i = 0; i <= formes / 100; i++) {
-                message.channel.bulkDelete(100);
-                formes -= i*100;
-              }
+    if(!message.member.hasPermission("MANAGE_MESSAGES")) {
+        if(message.member.roles.find(rl => rl.name === 'RUS')){
+            message.channel.send("У вас нет прав");
+        } else message.channel.send("You have no rights");
+        return;
+    }
+    let count = Number.parseInt(args[1]);
+    let mes = "";
+    message.channel
+    .bulkDelete(count +1 )
+    .then(() => {
+        if(message.member.roles.find(rl => rl.name === 'RUS')){
+            mes = `:wastebasket: Удалено ${count} сообщений`;
+        } else mes = `:wastebasket: Deleted ${count} messages`;
+        message.channel.send(mes).then(msg => msg.delete(5*1000));
+    })
+    .catch((err) => {
+        if(err == "DiscordAPIError: You can only bulk delete messages that are under 14 days old."){
+            if(message.member.roles.find(rl => rl.name === 'RUS')){
+                mes = "Вы можете массово удалять только сообщения которым меньше 14 дней.";
+            } else mes = "You can only bulk delete messages that are under 14 days old.";
+            message.channel.send(mes).then(msg => msg.delete(5*1000))
         }
-        else message.channel.bulkDelete(args[1]);
-        let embed = new discord.RichEmbed()
-        .setColor([255,125,0])
-        .setDescription(`${message.member}, Cleared ${args[1]}, messages!`)
-        .setAuthor(message.author.username, message.author.avatarURL,null)
-        .setTitle(`Channel: ${message.channel.name}`)
-        .setTimestamp();
-        let log = message.guild.channels.find("name", "log");
-        log.send(embed);
-        let mesid = await message.reply(`Cleared ${args[1]} messages!`);
-        let meslog = await message.channel.fetchMessage(mesid.id);
-        setTimeout(() => { meslog.delete();}, 1500);
+        console.log(err);
+    });
 };

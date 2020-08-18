@@ -5,20 +5,15 @@ const bot = require(`${process.cwd()}/bot.js`);
 //Creating module
 const main = new Module({
     "name": "Information", 
-    "description": "Module for inforamtion commands"
+    "description": "Module for inforamtion commands",
+    "rusdescription": "Модуль с информацией о командах",
 });
 //Commands
 const help = new Command({
     "name": "help", 
-    "description": "About the bot", 
+    "description": "Showing Boris's command list",
+    "rusdescription": "Показывает список команд BORIS", 
     "file": "./cmds/main/help.js",
     "usage": "+help"
 });
 main.addCommand(help);
-const buy = new Command({
-    "name": "buy", 
-    "description": "Buy cheat", 
-    "file": "./cmds/main/buy.js",
-    "usage": "+buy"
-});
-main.addCommand(buy);

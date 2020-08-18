@@ -30,20 +30,20 @@ module.exports.run = async message => {
             {
                 url = r.videos[0].videoId;
                 console.log(mesg+' '+url);
-                ytdl.getInfo(`${url}`, (err, info) => {
+                ytdl.getInfo(`${url}`,{range: {start: 0, end: 1}}, (err, info) => {
                     if(err) console.log(err);
                     if (!err) {
                         if(info.videoDetails.isLiveContent) return message.channel.send('Broadcasts not supported')
                         let songtittle = info.title;
                         url = info.video_url;
-                        var dur = info.videoDetails.lengthSeconds, minutes = Math.floor(dur / 60), seconds = dur - minutes * 60, time = `${minutes}:${seconds}`, imgurl = info.videoDetails.thumbnail.thumbnails[0].url;
-                        guild_queue.songs.push({url: url, title: info.title, requester: message.author.username, songduration: time, preview: imgurl})
+                        var dur = info.videoDetails.lengthSeconds, imgurl = info.videoDetails.thumbnail.thumbnails[0].url;
+                        guild_queue.songs.push({url: url, title: info.title, requester: message.author.username, songduration: getTime(dur), preview: imgurl})
                         let embed = new discord.RichEmbed()
                         .setTitle(info.title)
                         .setURL(url)
                         .setAuthor('Added to queue', message.member.user.avatarURL)
                         .addField('Channel', message.channel.name, true)
-                        .addField('Song Duration', time, true)
+                        .addField('Song Duration', getTime(dur), true)
                         .setThumbnail(imgurl)
                         .setColor(0x252525)
                         message.channel.send(embed)
@@ -62,14 +62,14 @@ module.exports.run = async message => {
                 if(info.videoDetails.isLiveContent) return message.channel.send('Broadcasts not supported')
                 let songtittle = info.title;
                 url = info.video_url;
-                var dur = info.videoDetails.lengthSeconds, minutes = Math.floor(dur / 60), seconds = dur - minutes * 60, time = `${minutes}:${seconds}`, imgurl = info.videoDetails.thumbnail.thumbnails[0].url;
-                guild_queue.songs.push({url: url, title: info.title, requester: message.author.username, songduration: time, preview: imgurl})
+                var dur = info.videoDetails.lengthSeconds, imgurl = info.videoDetails.thumbnail.thumbnails[0].url;
+                guild_queue.songs.push({url: url, title: info.title, requester: message.author.username, songduration: getTime(dur), preview: imgurl})
                 let embed = new discord.RichEmbed()
                 .setTitle(info.title)
                 .setURL(url)
                 .setAuthor('Added to queue', message.member.user.avatarURL)
                 .addField('Channel', message.channel.name, true)
-                .addField('Song Duration', time, true)
+                .addField('Song Duration', getTime(dur), true)
                 .setThumbnail(imgurl)
                 .setColor(0x252525)
                 message.channel.send(embed)
@@ -78,6 +78,17 @@ module.exports.run = async message => {
             }
         });
     }
+}
+
+function getTime(timeInSeconds){
+    var pad = function(num, size) { return ('000' + num).slice(size * -1); },
+    time = parseFloat(timeInSeconds).toFixed(3),
+    hours = Math.floor(time / 60 / 60),
+    minutes = Math.floor(time / 60) % 60,
+    seconds = Math.floor(time - minutes * 60),
+    milliseconds = time.slice(-3);
+    if(hours <= 0) return pad(minutes, 2) + ':' + pad(seconds, 2);
+    else return pad(hours, 2) + ':' + pad(minutes, 2) + ':' + pad(seconds, 2);
 }
 
 async function play(songs) {
@@ -89,7 +100,11 @@ async function play(songs) {
         songs.shift()
         if (songs.length > 0) play(songs)
         else {
-            msg.channel.send('Queue is empty')
+            if(msg.member.roles.find(rl => rl.name === 'RUS')){
+                msg.channel.send('Очередь пуста')
+            }else{
+                msg.channel.send('Queue is empty')
+            }
             connection.disconnect();
         }
     });
@@ -97,6 +112,11 @@ async function play(songs) {
 
 function skip(songs) {
     if (songs.length > 1){
+        if(msg.member.roles.find(rl => rl.name === 'RUS')){
+            msg.channel.send('Пропущено.')
+        }else{
+            msg.channel.send('Skipped.')
+        }
         dispatcher.end();
     }
 }
