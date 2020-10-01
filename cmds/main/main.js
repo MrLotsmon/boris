@@ -17,3 +17,11 @@ const help = new Command({
     "usage": "+help"
 });
 main.addCommand(help);
+const ping = new Command({
+    "name": "ping", 
+    "description": "Showing Boris's ping",
+    "rusdescription": "Показывает пинг BORIS'а", 
+    "file": "./cmds/main/ping.js",
+    "usage": "+ping"
+});
+main.addCommand(ping);
