@@ -8,3 +8,4 @@ Link for invitation (https://discord.com/oauth2/authorize?client_id=700692514214
   - [x] Clear multiple messages
   - [x] Help message
   - [x] Channel management
+  - [x] Ping
