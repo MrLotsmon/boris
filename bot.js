@@ -4,11 +4,13 @@ module.exports.modules = modules;
 module.exports.commands = cmd;
 const discord = require("discord.js");
 const client = new discord.Client();
+const token = process.env.token || "";
+const prefix = process.env.prefix || "+"
 module.exports.client = client;
 require("./modules.js");
 
 //#region BotEvents
-client.login(process.env.token);
+client.login(token);
 client.on("ready", async bot => {
     client.channels.get('737078310219153439').fetchMessage('737309985951973397');
     let guild = client.channels.get('737078310219153439').guild;
@@ -36,7 +38,7 @@ client.on("message", async message => {
     if(message.author == client.user) return;
     if(message.member.hasPermission("MANAGE_MESSAGES")) {
         cmd.forEach((value, key, map) => {
-            if(message.content.toLowerCase().startsWith(`${process.env.prefix}${value.name}`)) {
+            if(message.content.toLowerCase().startsWith(`${prefix}${value.name}`)) {
                 message.delete();
                 require(value.file).run(message);
             }
@@ -45,7 +47,7 @@ client.on("message", async message => {
     else
     if(message.channel == message.guild.channels.find("name", "bot-commands")){
         cmd.forEach((value, key, map) => {
-            if(message.content.toLowerCase().startsWith(`${process.env.prefix}${value.name}`)) {
+            if(message.content.toLowerCase().startsWith(`${prefix}${value.name}`)) {
                 message.delete();
                 require(value.file).run(message);
             }
